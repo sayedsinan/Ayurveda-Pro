@@ -1,15 +1,13 @@
 import 'dart:io';
 import 'dart:typed_data';
-import 'dart:ui';
 import 'package:flutter/services.dart';
-import 'package:get/get.dart';
+
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:open_file/open_file.dart';
 
-import '../controller/auth_controller.dart';
 
 class BillGenerator {
   static Future<void> generateBill({
@@ -28,8 +26,6 @@ class BillGenerator {
     required String paymentOption,
   }) async {
     final pdf = pw.Document();
-
-    // Format current date and time for "Booked On"
     final now = DateTime.now();
     final bookedDate = DateFormat('dd/MM/yyyy').format(now);
     final bookedTime = DateFormat('hh:mm a').format(now);
@@ -62,7 +58,7 @@ class BillGenerator {
                       fit: pw.BoxFit.contain,
                     ),
                   ),
-                  // Address details (right side)
+                
                   pw.Column(
                     crossAxisAlignment: pw.CrossAxisAlignment.end,
                     children: [
@@ -100,7 +96,7 @@ class BillGenerator {
               ),
               pw.SizedBox(height: 30),
 
-              // Patient Details Section
+            
               pw.Container(
                 padding: pw.EdgeInsets.all(15),
                 decoration: pw.BoxDecoration(
@@ -153,10 +149,10 @@ class BillGenerator {
               ),
               pw.SizedBox(height: 20),
 
-              // Treatment Table
+        
               pw.Column(
                 children: [
-                  // Table Header
+                
                   pw.Container(
                     padding: pw.EdgeInsets.all(10),
                     decoration: pw.BoxDecoration(
@@ -360,15 +356,7 @@ class BillGenerator {
               ),
               pw.Spacer(),
 
-              // Thank You Message with signature
-              pw.Center(
-                child: pw.Column(
-                  children: [],
-                ),
-              ),
-              pw.SizedBox(height: 30),
-
-              // Footer Note
+          
               pw.Center(
                 child: pw.Text(
                   '*Booking amount is non-refundable, and it\'s important to arrive on the allotted time for your treatment*',
@@ -382,14 +370,14 @@ class BillGenerator {
       ),
     );
 
-    // Save the PDF
+   
     final output = await getTemporaryDirectory();
     final file = File(
       '${output.path}/ayurveda_bill_${DateTime.now().millisecondsSinceEpoch}.pdf',
     );
     await file.writeAsBytes(await pdf.save());
 
-    // Open the PDF
+  
     await OpenFile.open(file.path);
   }
 

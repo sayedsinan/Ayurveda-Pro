@@ -9,6 +9,7 @@ import 'package:ayurveda_app/view/widgets/treatment_edit_box.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+
 import '../controller/auth_controller.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -49,38 +50,38 @@ class _RegisterScreenState extends State<RegisterScreen> {
     {'name': 'Couple Combo package i...', 'male': 2, 'female': 3},
   ];
 
-Future<void> _generateBill() async {
-  final controller = Get.find<AuthController>();
-  
-  // Validate that required fields are filled
-  if (controller.nameController.text.isEmpty || 
-      controller.whatsappController.text.isEmpty ||
-      controller.addressController.text.isEmpty) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Please fill all required fields')),
+  Future<void> _generateBill() async {
+    final controller = Get.find<AuthController>();
+
+    if (controller.nameController.text.isEmpty ||
+        controller.whatsappController.text.isEmpty ||
+        controller.addressController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please fill all required fields')),
+      );
+      return;
+    }
+
+    await BillGenerator.generateBill(
+      patientName: controller.nameController.text,
+      address: controller.addressController.text,
+      whatsappNumber: controller.whatsappController.text,
+      location: _selectedLocation,
+      branch: _selectedBranch,
+      treatments: treatments,
+      totalAmount: controller.totalAmountController.text,
+      discountAmount: controller.discountController.text,
+      advanceAmount: controller.advanceController.text,
+      balanceAmount: controller.balanceController.text,
+      treatmentDate: _selectedTreatmentDate,
+      treatmentTime: '$_selectedHour:$_selectedMinute',
+      paymentOption: _selectedPaymentOption,
     );
-    return;
   }
 
-  await BillGenerator.generateBill(
-    patientName: controller.nameController.text,
-    address: controller.addressController.text,
-    whatsappNumber: controller.whatsappController.text,
-    location: _selectedLocation,
-    branch: _selectedBranch,
-    treatments: treatments,
-    totalAmount: controller.totalAmountController.text,
-    discountAmount: controller.discountController.text,
-    advanceAmount: controller.advanceController.text,
-    balanceAmount: controller.balanceController.text,
-    treatmentDate: _selectedTreatmentDate,
-    treatmentTime: '$_selectedHour:$_selectedMinute',
-    paymentOption: _selectedPaymentOption,
-  );
-}
   @override
   Widget build(BuildContext context) {
- final controller=Get.find<AuthController>();
+    final controller = Get.find<AuthController>();
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -90,14 +91,7 @@ Future<void> _generateBill() async {
           icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          "Register",
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 18,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
+        
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 16.0),
@@ -111,19 +105,53 @@ Future<void> _generateBill() async {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              CustomInputFiled(hintText: "Name", controller: controller.nameController),
-              const SizedBox(height: 20),
+              const Text(
+          "Register",
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 24,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        SizedBox(height: 10,),
+              Text(
+                "Name",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w400),
+              ),
+              const SizedBox(height: 8),
               CustomInputFiled(
-                hintText: "Whatsapp Number",
+                hintText: "Enter your name",
+                controller: controller.nameController,
+                keyboardType: TextInputType.name,
+              ),
+              const SizedBox(height: 20),
+              Text(
+                "Whatsapp number",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w400),
+              ),
+              const SizedBox(height: 10),
+              CustomInputFiled(
+                hintText: "Enter your Whatsapp Number",
                 controller: controller.whatsappController,
+                keyboardType: TextInputType.phone,
               ),
               const SizedBox(height: 20),
+              Text(
+                "Address",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w400),
+              ),
+              const SizedBox(height: 8),
               CustomInputFiled(
-                hintText: "Address",
+                hintText: "Enter your full address",
                 controller: controller.addressController,
+                keyboardType: TextInputType.streetAddress,
               ),
               const SizedBox(height: 20),
-
+              Text(
+                "Location",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w400),
+              ),
+              const SizedBox(height: 8),
               CustomDropdownField(
                 hintText: 'Location',
                 value: _selectedLocation,
@@ -133,7 +161,11 @@ Future<void> _generateBill() async {
                 },
               ),
               const SizedBox(height: 20),
-
+              Text(
+                "Branch",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w400),
+              ),
+              SizedBox(height: 8),
               CustomDropdownField(
                 hintText: 'Branch',
                 value: _selectedBranch,
@@ -176,15 +208,27 @@ Future<void> _generateBill() async {
                 child: MyButton(text: "+ Add Treatment", onPressed: () {}),
               ),
               const SizedBox(height: 20),
-
+              Text(
+                "Total amount",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w400),
+              ),
+              SizedBox(height: 8),
               CustomInputFiled(
-                hintText: "Total Amount",
+                hintText: "",
                 controller: controller.totalAmountController,
+                keyboardType: TextInputType.number,
               ),
               const SizedBox(height: 20),
+              Text(
+                "Discount Amount",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w400),
+              ),
+              SizedBox(height: 8),
+
               CustomInputFiled(
-                hintText: "Discount Amount",
+                hintText: "",
                 controller: controller.discountController,
+                keyboardType: TextInputType.number,
               ),
               const SizedBox(height: 20),
 
@@ -200,14 +244,24 @@ Future<void> _generateBill() async {
                 },
               ),
               const SizedBox(height: 20),
-
+              Text(
+                "Advance Amount",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w400),
+              ),
+             const  SizedBox(height: 8),
               CustomInputFiled(
-                hintText: "Advance Amount",
+                hintText: "",
                 controller: controller.advanceController,
+                keyboardType: TextInputType.number,
               ),
               const SizedBox(height: 20),
+              Text(
+                "Balance Amount",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w400),
+              ),  
+              const SizedBox(height: 8),
               CustomInputFiled(
-                hintText: "Balance Amount",
+                hintText: "",
                 controller: controller.balanceController,
               ),
               const SizedBox(height: 20),
@@ -253,7 +307,7 @@ Future<void> _generateBill() async {
               ),
               const SizedBox(height: 30),
 
-              MyButton(text: "Save", onPressed:()=>_generateBill()),
+              MyButton(text: "Save", onPressed: () => _generateBill()),
               const SizedBox(height: 20),
             ],
           ),

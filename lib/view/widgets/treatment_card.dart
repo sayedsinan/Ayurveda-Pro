@@ -2,7 +2,7 @@ import 'package:ayurveda_app/view/widgets/counter.dart';
 import 'package:flutter/material.dart';
 class TreatmentCard extends StatelessWidget {
   final Map<String, dynamic> treatment;
-  final VoidCallback? onEdit; // Add this
+  final VoidCallback? onEdit; 
 
   const TreatmentCard({super.key, required this.treatment, this.onEdit});
 
@@ -41,7 +41,7 @@ class TreatmentCard extends StatelessWidget {
             children: [
               IconButton(
                 icon: const Icon(Icons.edit_outlined, color: Color(0xFF006837)),
-                onPressed: onEdit, // Call the callback
+                onPressed: onEdit,
               ),
               IconButton(
                 icon: const Icon(Icons.close, color: Colors.red),

@@ -31,7 +31,17 @@ class _TreatmentEditDialogState extends State<TreatmentEditDialog> {
   void initState() {
     super.initState();
     if (widget.treatment != null) {
-      _selectedTreatment = widget.treatment!['name'] ?? _selectedTreatment;
+      String treatmentName = widget.treatment!['name'] ?? 'Choose preferred treatment';
+      
+      // Check if the treatment exists in the list, if not add it or use default
+      if (treatments.contains(treatmentName)) {
+        _selectedTreatment = treatmentName;
+      } else if (treatmentName != 'Choose preferred treatment') {
+        // Optionally add the treatment to the list
+        treatments.add(treatmentName);
+        _selectedTreatment = treatmentName;
+      }
+      
       _maleCount = widget.treatment!['male'] ?? 0;
       _femaleCount = widget.treatment!['female'] ?? 0;
     }
