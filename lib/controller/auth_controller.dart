@@ -9,6 +9,13 @@ import 'package:http/http.dart' as http;
 class AuthController extends GetxController {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
+  TextEditingController nameController = TextEditingController();
+  TextEditingController whatsappController = TextEditingController();
+  TextEditingController addressController = TextEditingController();
+  TextEditingController totalAmountController = TextEditingController();
+  TextEditingController discountController = TextEditingController();
+  TextEditingController advanceController = TextEditingController();
+  TextEditingController balanceController = TextEditingController();
   Future<void> login(Login user) async {
     final baseUrl = dotenv.env['BASE_URL'] ?? "";
     final url = Uri.parse("${baseUrl}Login");

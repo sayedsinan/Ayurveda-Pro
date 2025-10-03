@@ -1,3 +1,4 @@
+import 'package:ayurveda_app/view/bill_screen.dart';
 import 'package:ayurveda_app/view/widgets/custom_dropdown.dart';
 import 'package:ayurveda_app/view/widgets/custom_input_filed.dart';
 import 'package:ayurveda_app/view/widgets/date_picker_field.dart';
@@ -6,6 +7,9 @@ import 'package:ayurveda_app/view/widgets/payment_option.dart';
 import 'package:ayurveda_app/view/widgets/treatment_card.dart';
 import 'package:ayurveda_app/view/widgets/treatment_edit_box.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+
+import '../controller/auth_controller.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({Key? key}) : super(key: key);
@@ -15,14 +19,6 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
-  final _nameController = TextEditingController();
-  final _whatsappController = TextEditingController();
-  final _addressController = TextEditingController();
-  final _totalAmountController = TextEditingController();
-  final _discountController = TextEditingController();
-  final _advanceController = TextEditingController();
-  final _balanceController = TextEditingController();
-
   String _selectedLocation = 'Choose your location';
   String _selectedBranch = 'Select the branch';
   String _selectedPaymentOption = 'Cash';
@@ -53,8 +49,38 @@ class _RegisterScreenState extends State<RegisterScreen> {
     {'name': 'Couple Combo package i...', 'male': 2, 'female': 3},
   ];
 
+Future<void> _generateBill() async {
+  final controller = Get.find<AuthController>();
+  
+  // Validate that required fields are filled
+  if (controller.nameController.text.isEmpty || 
+      controller.whatsappController.text.isEmpty ||
+      controller.addressController.text.isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Please fill all required fields')),
+    );
+    return;
+  }
+
+  await BillGenerator.generateBill(
+    patientName: controller.nameController.text,
+    address: controller.addressController.text,
+    whatsappNumber: controller.whatsappController.text,
+    location: _selectedLocation,
+    branch: _selectedBranch,
+    treatments: treatments,
+    totalAmount: controller.totalAmountController.text,
+    discountAmount: controller.discountController.text,
+    advanceAmount: controller.advanceController.text,
+    balanceAmount: controller.balanceController.text,
+    treatmentDate: _selectedTreatmentDate,
+    treatmentTime: '$_selectedHour:$_selectedMinute',
+    paymentOption: _selectedPaymentOption,
+  );
+}
   @override
   Widget build(BuildContext context) {
+ final controller=Get.find<AuthController>();
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -85,16 +111,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              CustomInputFiled(hintText: "Name", controller: _nameController),
+              CustomInputFiled(hintText: "Name", controller: controller.nameController),
               const SizedBox(height: 20),
               CustomInputFiled(
                 hintText: "Whatsapp Number",
-                controller: _whatsappController,
+                controller: controller.whatsappController,
               ),
               const SizedBox(height: 20),
               CustomInputFiled(
                 hintText: "Address",
-                controller: _addressController,
+                controller: controller.addressController,
               ),
               const SizedBox(height: 20),
 
@@ -153,12 +179,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
               CustomInputFiled(
                 hintText: "Total Amount",
-                controller: _totalAmountController,
+                controller: controller.totalAmountController,
               ),
               const SizedBox(height: 20),
               CustomInputFiled(
                 hintText: "Discount Amount",
-                controller: _discountController,
+                controller: controller.discountController,
               ),
               const SizedBox(height: 20),
 
@@ -177,12 +203,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
               CustomInputFiled(
                 hintText: "Advance Amount",
-                controller: _advanceController,
+                controller: controller.advanceController,
               ),
               const SizedBox(height: 20),
               CustomInputFiled(
                 hintText: "Balance Amount",
-                controller: _balanceController,
+                controller: controller.balanceController,
               ),
               const SizedBox(height: 20),
 
@@ -227,7 +253,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
               const SizedBox(height: 30),
 
-              MyButton(text: "Save", onPressed: () {}),
+              MyButton(text: "Save", onPressed:()=>_generateBill()),
               const SizedBox(height: 20),
             ],
           ),
