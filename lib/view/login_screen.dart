@@ -1,7 +1,7 @@
 import 'dart:ui';
 
 import 'package:ayurveda_app/controller/auth_controller.dart';
-import 'package:ayurveda_app/view/home_page.dart';
+import 'package:ayurveda_app/model/user_model.dart';
 import 'package:ayurveda_app/view/widgets/custom_input_filed.dart';
 import 'package:ayurveda_app/view/widgets/my_button.dart';
 import 'package:flutter/material.dart';
@@ -18,7 +18,6 @@ class LoginScreen extends StatelessWidget {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // Top Image & Logo
             Container(
               height: MediaQuery.of(context).size.height * 0.35,
               decoration: const BoxDecoration(
@@ -37,7 +36,11 @@ class LoginScreen extends StatelessWidget {
                     ),
                   ),
                   Center(
-                    child: Image.asset('assets/logo.png', width: 80, height: 80),
+                    child: Image.asset(
+                      'assets/logo.png',
+                      width: 80,
+                      height: 80,
+                    ),
                   ),
                 ],
               ),
@@ -107,7 +110,8 @@ class LoginScreen extends StatelessWidget {
                     text: "Login",
                     onPressed: () {
                       final email = controller.emailController.text.trim();
-                      final password = controller.passwordController.text.trim();
+                      final password = controller.passwordController.text
+                          .trim();
 
                       if (email.isEmpty || password.isEmpty) {
                         Get.snackbar(
@@ -119,13 +123,11 @@ class LoginScreen extends StatelessWidget {
                         return;
                       }
 
-                      Get.offAll(() => const HomePage());
+                      controller.login(Login(email: email, password: password), );
                     },
                   ),
 
                   const SizedBox(height: 24),
-
-                  // Terms & Privacy
                   Center(
                     child: RichText(
                       textAlign: TextAlign.center,
@@ -137,7 +139,8 @@ class LoginScreen extends StatelessWidget {
                         ),
                         children: [
                           const TextSpan(
-                            text: 'By creating or logging into an account you are agreeing\nwith our ',
+                            text:
+                                'By creating or logging into an account you are agreeing\nwith our ',
                           ),
                           TextSpan(
                             text: 'Terms and Conditions',

@@ -1,6 +1,6 @@
 import 'dart:convert';
-
 import 'package:ayurveda_app/model/user_model.dart';
+import 'package:ayurveda_app/view/home_page.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
@@ -16,6 +16,7 @@ class AuthController extends GetxController {
   TextEditingController discountController = TextEditingController();
   TextEditingController advanceController = TextEditingController();
   TextEditingController balanceController = TextEditingController();
+
   Future<void> login(Login user) async {
     final baseUrl = dotenv.env['BASE_URL'] ?? "";
     final url = Uri.parse("${baseUrl}Login");
@@ -23,19 +24,18 @@ class AuthController extends GetxController {
     try {
       final response = await http.post(
         url,
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode({"email": user.email, "password": user.password}),
+        headers: {"Content-Type": "application/x-www-form-urlencoded"},
+        body: {"username": user.email, "password": user.password},
       );
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-
         final token = data["token"];
         print("Login successful, token: $token");
-
-        // Get.offAll(() => const HomeScreen());
+        Get.offAll(HomePage());
       } else {
-        print(response.statusCode);
+        print("Status Code: ${response.statusCode}");
+        print("Response Body: ${response.body}");
         Get.snackbar(
           "Error",
           "Invalid credentials",
@@ -43,6 +43,7 @@ class AuthController extends GetxController {
         );
       }
     } catch (e) {
+      print("Exception: $e");
       Get.snackbar(
         "Error",
         "Something went wrong: $e",
