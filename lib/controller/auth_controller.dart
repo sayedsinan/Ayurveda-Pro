@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'package:ayurveda_app/model/user_model.dart';
+import 'package:ayurveda_app/services/token_services.dart';
+
 import 'package:ayurveda_app/view/home_page.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -17,11 +19,14 @@ class AuthController extends GetxController {
   TextEditingController advanceController = TextEditingController();
   TextEditingController balanceController = TextEditingController();
 
+  var isLoading = false.obs;
+
   Future<void> login(Login user) async {
     final baseUrl = dotenv.env['BASE_URL'] ?? "";
     final url = Uri.parse("${baseUrl}Login");
 
     try {
+      isLoading(true);
       final response = await http.post(
         url,
         headers: {"Content-Type": "application/x-www-form-urlencoded"},
@@ -31,10 +36,21 @@ class AuthController extends GetxController {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         final token = data["token"];
-        print("Login successful, token: $token");
-        Get.offAll(HomePage());
+        
+        // Save token
+        await TokenService.saveToken(token);
+        
+        print("✅ Login successful, token saved");
+        
+        Get.offAll(() => HomePage());
+        
+        Get.snackbar(
+          "Success",
+          "Login successful!",
+          snackPosition: SnackPosition.BOTTOM,
+        );
       } else {
-        print("Status Code: ${response.statusCode}");
+        print("❌ Status Code: ${response.statusCode}");
         print("Response Body: ${response.body}");
         Get.snackbar(
           "Error",
@@ -43,12 +59,15 @@ class AuthController extends GetxController {
         );
       }
     } catch (e) {
-      print("Exception: $e");
+      print("❌ Exception: $e");
       Get.snackbar(
         "Error",
         "Something went wrong: $e",
         snackPosition: SnackPosition.BOTTOM,
       );
+    } finally {
+      isLoading(false);
     }
   }
+ 
 }
