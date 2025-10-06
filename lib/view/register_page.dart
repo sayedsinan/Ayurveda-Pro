@@ -53,15 +53,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
     super.initState();
     final controller = Get.find<AuthController>();
     
-    // Load branches and treatments
+ 
     if (controller.branches.isEmpty) {
       controller.fetchBranches();
     }
     if (controller.treatments.isEmpty) {
       controller.fetchTreatments();
     }
-    
-    // Populate branches dropdown from API
+
     controller.branches.listen((branchList) {
       if (branchList.isNotEmpty) {
         setState(() {
@@ -83,10 +82,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
       return;
     }
 
-    // First save the registration to API
     await _saveToAPI();
 
-    // Then generate the bill
+  
     await BillGenerator.generateBill(
       patientName: controller.nameController.text,
       address: controller.addressController.text,
@@ -107,7 +105,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Future<void> _saveToAPI() async {
     final controller = Get.find<AuthController>();
 
-    // Validation
+
     if (_selectedBranch == 'Select the branch') {
       Get.snackbar("Error", "Please select a branch",
           snackPosition: SnackPosition.BOTTOM);
@@ -126,41 +124,40 @@ class _RegisterScreenState extends State<RegisterScreen> {
       return;
     }
 
-    // Set selected branch in controller
+
     final selectedBranchObj = controller.branches.firstWhere(
       (b) => b.name == _selectedBranch,
       orElse: () => controller.branches.first,
     );
     controller.selectedBranch.value = selectedBranchObj;
 
-    // Extract male and female treatment IDs from treatments list
+
     List<int> maleTreatmentIds = [];
     List<int> femaleTreatmentIds = [];
 
     for (var treatment in treatments) {
-      // Find treatment ID from controller.treatments by name
+  
       final treatmentObj = controller.treatments.firstWhereOrNull(
         (t) => t.name.contains(treatment['name'].toString().substring(0, 10)),
       );
       
       if (treatmentObj != null) {
-        // Add male count
+       
         for (int i = 0; i < treatment['male']; i++) {
           maleTreatmentIds.add(treatmentObj.id);
         }
-        // Add female count
         for (int i = 0; i < treatment['female']; i++) {
           femaleTreatmentIds.add(treatmentObj.id);
         }
       }
     }
 
-    // Format date and time
+ 
     final dateTime = '$_selectedTreatmentDate $_selectedHour:$_selectedMinute';
 
-    // Call register API
+
     await controller.registerPatient(
-      executive: _selectedLocation, // Using location as executive for now
+      executive: _selectedLocation, 
       payment: _selectedPaymentOption,
       dateTime: dateTime,
       maleTreatmentIds: maleTreatmentIds,
