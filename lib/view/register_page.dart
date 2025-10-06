@@ -8,8 +8,6 @@ import 'package:ayurveda_app/view/widgets/treatment_card.dart';
 import 'package:ayurveda_app/view/widgets/treatment_edit_box.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
-
 import '../controller/auth_controller.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -50,6 +48,29 @@ class _RegisterScreenState extends State<RegisterScreen> {
     {'name': 'Couple Combo package i...', 'male': 2, 'female': 3},
   ];
 
+  @override
+  void initState() {
+    super.initState();
+    final controller = Get.find<AuthController>();
+    
+    // Load branches and treatments
+    if (controller.branches.isEmpty) {
+      controller.fetchBranches();
+    }
+    if (controller.treatments.isEmpty) {
+      controller.fetchTreatments();
+    }
+    
+    // Populate branches dropdown from API
+    controller.branches.listen((branchList) {
+      if (branchList.isNotEmpty) {
+        setState(() {
+          branches = ['Select the branch', ...branchList.map((b) => b.name).toList()];
+        });
+      }
+    });
+  }
+
   Future<void> _generateBill() async {
     final controller = Get.find<AuthController>();
 
@@ -62,6 +83,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
       return;
     }
 
+    // First save the registration to API
+    await _saveToAPI();
+
+    // Then generate the bill
     await BillGenerator.generateBill(
       patientName: controller.nameController.text,
       address: controller.addressController.text,
@@ -79,6 +104,70 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
+  Future<void> _saveToAPI() async {
+    final controller = Get.find<AuthController>();
+
+    // Validation
+    if (_selectedBranch == 'Select the branch') {
+      Get.snackbar("Error", "Please select a branch",
+          snackPosition: SnackPosition.BOTTOM);
+      return;
+    }
+
+    if (_selectedTreatmentDate == 'Choose Date') {
+      Get.snackbar("Error", "Please select treatment date",
+          snackPosition: SnackPosition.BOTTOM);
+      return;
+    }
+
+    if (_selectedHour == 'Hours' || _selectedMinute == 'Minutes') {
+      Get.snackbar("Error", "Please select treatment time",
+          snackPosition: SnackPosition.BOTTOM);
+      return;
+    }
+
+    // Set selected branch in controller
+    final selectedBranchObj = controller.branches.firstWhere(
+      (b) => b.name == _selectedBranch,
+      orElse: () => controller.branches.first,
+    );
+    controller.selectedBranch.value = selectedBranchObj;
+
+    // Extract male and female treatment IDs from treatments list
+    List<int> maleTreatmentIds = [];
+    List<int> femaleTreatmentIds = [];
+
+    for (var treatment in treatments) {
+      // Find treatment ID from controller.treatments by name
+      final treatmentObj = controller.treatments.firstWhereOrNull(
+        (t) => t.name.contains(treatment['name'].toString().substring(0, 10)),
+      );
+      
+      if (treatmentObj != null) {
+        // Add male count
+        for (int i = 0; i < treatment['male']; i++) {
+          maleTreatmentIds.add(treatmentObj.id);
+        }
+        // Add female count
+        for (int i = 0; i < treatment['female']; i++) {
+          femaleTreatmentIds.add(treatmentObj.id);
+        }
+      }
+    }
+
+    // Format date and time
+    final dateTime = '$_selectedTreatmentDate $_selectedHour:$_selectedMinute';
+
+    // Call register API
+    await controller.registerPatient(
+      executive: _selectedLocation, // Using location as executive for now
+      payment: _selectedPaymentOption,
+      dateTime: dateTime,
+      maleTreatmentIds: maleTreatmentIds,
+      femaleTreatmentIds: femaleTreatmentIds,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<AuthController>();
@@ -91,7 +180,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
           icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
-        
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 16.0),
@@ -106,14 +194,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
-          "Register",
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 24,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        SizedBox(height: 10,),
+                "Register",
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 24,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              SizedBox(height: 10),
               Text(
                 "Name",
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.w400),
@@ -166,14 +254,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.w400),
               ),
               SizedBox(height: 8),
-              CustomDropdownField(
-                hintText: 'Branch',
-                value: _selectedBranch,
-                items: branches,
-                onChanged: (val) {
-                  setState(() => _selectedBranch = val!);
-                },
-              ),
+              Obx(() => CustomDropdownField(
+                    hintText: 'Branch',
+                    value: _selectedBranch,
+                    items: controller.branches.isEmpty
+                        ? branches
+                        : [
+                            'Select the branch',
+                            ...controller.branches.map((b) => b.name).toList()
+                          ],
+                    onChanged: (val) {
+                      setState(() => _selectedBranch = val!);
+                    },
+                  )),
               const SizedBox(height: 20),
 
               const Text(
@@ -248,7 +341,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 "Advance Amount",
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.w400),
               ),
-             const  SizedBox(height: 8),
+              const SizedBox(height: 8),
               CustomInputFiled(
                 hintText: "",
                 controller: controller.advanceController,
@@ -258,11 +351,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
               Text(
                 "Balance Amount",
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.w400),
-              ),  
+              ),
               const SizedBox(height: 8),
               CustomInputFiled(
                 hintText: "",
                 controller: controller.balanceController,
+                keyboardType: TextInputType.number,
               ),
               const SizedBox(height: 20),
 

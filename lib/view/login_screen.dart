@@ -1,5 +1,4 @@
 import 'dart:ui';
-
 import 'package:ayurveda_app/controller/auth_controller.dart';
 import 'package:ayurveda_app/model/user_model.dart';
 import 'package:ayurveda_app/view/widgets/custom_input_filed.dart';
@@ -45,8 +44,6 @@ class LoginScreen extends StatelessWidget {
                 ],
               ),
             ),
-
-            // Form Container
             Container(
               width: double.infinity,
               decoration: const BoxDecoration(
@@ -88,7 +85,6 @@ class LoginScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 20),
 
-                  // Password Field
                   const Text(
                     'Password',
                     style: TextStyle(
@@ -102,10 +98,10 @@ class LoginScreen extends StatelessWidget {
                     hintText: 'Enter your password',
                     controller: controller.passwordController,
                     keyboardType: TextInputType.visiblePassword,
+                    isPassword: true,
                   ),
                   const SizedBox(height: 32),
 
-                  // Login Button
                   MyButton(
                     text: "Login",
                     onPressed: () {
